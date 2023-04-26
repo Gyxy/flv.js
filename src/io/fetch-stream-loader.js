@@ -124,6 +124,12 @@ class FetchStreamLoader extends BaseLoader {
         }
 
         this._status = LoaderStatus.kConnecting;
+
+        // 判断数据来源信息 如果数据来源信息未其他来源则不需要进行fetch进行请求数据
+
+        console.log(seekConfig)
+        console.log(dataSource)
+
         self.fetch(seekConfig.url, params).then((res) => {
             if (this._requestAbort) {
                 this._status = LoaderStatus.kIdle;
@@ -221,6 +227,8 @@ class FetchStreamLoader extends BaseLoader {
                 this._receivedLength += chunk.byteLength;
 
                 if (this._onDataArrival) {
+                    // 在这里处理获取到的数据信息 chunk 未当前读取到的块信息
+                    this.sendBufferToOtherClient({chunk,byteStart})
                     this._onDataArrival(chunk, byteStart, this._receivedLength);
                 }
 
@@ -261,6 +269,22 @@ class FetchStreamLoader extends BaseLoader {
         });
     }
 
+    sendBufferToOtherClient(bufferData){
+        this._emitter.emit('chunkReturn', bufferData);
+    }
+
 }
 
 export default FetchStreamLoader;
+
+
+
+
+
+
+
+// 1.前台获取code 
+// 2.后台根据code查询到用户的openid 
+// 3.查询openId对应的用户是否存在 
+// 3.1 如果用户存在登录成功查询出对应用户信息登录成功  
+// 3.2 如果用户不存在  则返回对应openId 前台提示用户绑定手机号(本质上还是用户注册的流程 不过是加上了openId的绑定逻辑) 

@@ -8,13 +8,13 @@
 </head>
 
 <body>
-    
+    <!-- <video controls autoplay style="width: 500px;height: 200px;" id="lwVideo"></video> -->
     <div class="mainContainer">
         <div>
             <div id="streamURL">
                 <div class="url-input">
                     <label for="sURL">Stream URL:</label>
-                    <input id="sURL" type="text" value="http://127.0.0.1/flv/7182741-1.flv" />
+                    <input id="sURL" type="text" value="https://pull-fyb-flv.yinghecloud.com/fengyangbao/09165640e40d11ed86fd9dd230938945.flv?secret=b62ba0adb61de4aa6cf8a0a179ee3f0c&timestamp=1682501644" />
                     <button onclick="switch_mds()">Switch to MediaDataSource</button>
                 </div>
                 <div class="options">
@@ -55,11 +55,12 @@
     </div>
 
     <script src="../dist/flv.js"></script>
+    <!-- <script src="./lwTest.js"></script> -->
     
     <script>
         var checkBoxFields = ['isLive', 'withCredentials', 'hasAudio', 'hasVideo'];
         var streamURL, mediaSourceURL;
-
+        // initPlayer();
         function flv_load() {
             console.log('isSupported: ' + flvjs.isSupported());
             if (mediaSourceURL.className === '') {
@@ -75,7 +76,8 @@
             } else {
                 var i;
                 var mediaDataSource = {
-                    type: 'flv'
+                    type: 'flv',
+                    dataRefer:'url'
                 };
                 for (i = 0; i < checkBoxFields.length; i++) {
                     var field = checkBoxFields[i];
@@ -104,8 +106,16 @@
                 lazyLoadMaxDuration: 3 * 60,
                 seekType: 'range',
             });
+            
             player.attachMediaElement(element);
             player.load();
+            player.on('chunkReturn',(data)=>{
+                // console.log("加载到的数据",data)
+            })
+            player.on('loadBuffer',(data)=>{
+                // toAppendAllBuffer(data);
+            })
+
         }
 
         function flv_start() {

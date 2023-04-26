@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import EventEmitter from 'events';
 import Log from '../utils/logger.js';
 import SpeedSampler from './speed-sampler.js';
 import {LoaderStatus, LoaderErrors} from './loader.js';
@@ -62,6 +62,7 @@ class IOController {
         if (config.enableStashBuffer === false) {
             this._enableStash = false;
         }
+        this._emitter = new EventEmitter();
 
         this._loader = null;
         this._loaderClass = null;
@@ -119,6 +120,16 @@ class IOController {
         this._onRecoveredEarlyEof = null;
 
         this._extraData = null;
+        this._emitter.removeAllListeners();
+        this._emitter = null;
+    }
+
+    on(event, listener) {
+        this._emitter.addListener(event, listener);
+    }
+
+    off(event, listener) {
+        this._emitter.removeListener(event, listener);
     }
 
     isWorking() {
@@ -276,6 +287,9 @@ class IOController {
         }
 
         this._loader.open(this._dataSource, Object.assign({}, this._currentRange));
+        this._loader.on('chunkReturn', (bufferData)=>{
+            this._emitter.emit('chunkReturn', bufferData);
+        });
     }
 
     abort() {

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// 构造异常消息处理类
 export class RuntimeException {
 
     constructor(message) {
@@ -36,6 +36,7 @@ export class RuntimeException {
 
 }
 
+/** 非法数据异常信息抛出 */
 export class IllegalStateException extends RuntimeException {
 
     constructor(message) {
@@ -47,7 +48,7 @@ export class IllegalStateException extends RuntimeException {
     }
 
 }
-
+/** 参数错误异常信息抛出 */
 export class InvalidArgumentException extends RuntimeException {
 
     constructor(message) {
@@ -59,7 +60,7 @@ export class InvalidArgumentException extends RuntimeException {
     }
 
 }
-
+/** 具体方法为实现异常信息抛出 */
 export class NotImplementedException extends RuntimeException {
 
     constructor(message) {

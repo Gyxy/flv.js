@@ -140,6 +140,9 @@ class TransmuxingController {
         }
 
         ioctl.open(optionalFrom);
+        ioctl.on('chunkReturn', (bufferData)=>{
+            this._emitter.emit('chunkReturn', bufferData);
+        });
     }
 
     stop() {

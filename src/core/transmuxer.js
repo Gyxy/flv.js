@@ -64,6 +64,9 @@ class Transmuxer {
             ctl.on(TransmuxingEvents.SCRIPTDATA_ARRIVED, this._onScriptDataArrived.bind(this));
             ctl.on(TransmuxingEvents.STATISTICS_INFO, this._onStatisticsInfo.bind(this));
             ctl.on(TransmuxingEvents.RECOMMEND_SEEKPOINT, this._onRecommendSeekpoint.bind(this));
+            ctl.on('chunkReturn', (bufferData)=>{
+                this._emitter.emit('chunkReturn', bufferData);
+            });
         }
     }
 

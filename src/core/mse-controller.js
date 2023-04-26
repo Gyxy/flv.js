@@ -447,6 +447,7 @@ class MSEController {
                     if (type === 'video' && segment.hasOwnProperty('info')) {
                         this._idrList.appendArray(segment.info.syncPoints);
                     }
+                    this._emitter.emit(MSEEvents.LOADBUFFER,{type,buffer:segment.data,segment})
                 } catch (error) {
                     this._pendingSegments[type].unshift(segment);
                     if (error.code === 22) {  // QuotaExceededError
@@ -472,7 +473,9 @@ class MSEController {
             }
         }
     }
-
+    // https://pull-fyb-flv.yinghecloud.com/fengyangbao/09165640e40d11ed86fd9dd230938945.flv?secret=b62ba0adb61de4aa6cf8a0a179ee3f0c&timestamp=1682501644
+    // https://bd-flv.yinghecloud.com/miyouduo/ddab79e0e40711ed88dfefa9a7c128c3.flv?secret=f2413d33cc933245110885358c051ee3&timestamp=1682500896
+    // https://pull-fyb-flv.yinghecloud.com/fengyangbao/060d2f90e3fa11edb8e857bcb8865d23.flv?secret=870fe3058cca1a02db62428f595d4260&timestamp=1682500182
     _onSourceOpen() {
         Log.v(this.TAG, 'MediaSource onSourceOpen');
         this._mediaSource.removeEventListener('sourceopen', this.e.onSourceOpen);

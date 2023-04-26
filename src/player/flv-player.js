@@ -29,25 +29,29 @@ import {createDefaultConfig} from '../config.js';
 import {InvalidArgumentException, IllegalStateException} from '../utils/exception.js';
 
 class FlvPlayer {
-
+    // 构造函数需要传入媒体配置信息和其他配置信息
     constructor(mediaDataSource, config) {
+        // 定义当前标识为 FlvPlayer
         this.TAG = 'FlvPlayer';
+        // 定义当前类型为 FlvPlayer
         this._type = 'FlvPlayer';
+        // 定义事件抛出方法
         this._emitter = new EventEmitter();
-
+        // 初始化基础配置信息
         this._config = createDefaultConfig();
+        // 赋值配置信息未传递过来的配置信息
         if (typeof config === 'object') {
             Object.assign(this._config, config);
         }
-
+        // 检测媒体配置信息的类型是否为flv
         if (mediaDataSource.type.toLowerCase() !== 'flv') {
             throw new InvalidArgumentException('FlvPlayer requires an flv MediaDataSource input!');
         }
-
+        // 检测当前是否为直播流
         if (mediaDataSource.isLive === true) {
             this._config.isLive = true;
         }
-
+        // 重新生成方法绑定this对象到FlvPlayer对应上
         this.e = {
             onvLoadedMetadata: this._onvLoadedMetadata.bind(this),
             onvSeeking: this._onvSeeking.bind(this),
@@ -56,27 +60,39 @@ class FlvPlayer {
             onvProgress: this._onvProgress.bind(this)
         };
 
+        // 判断当前浏览器性能是否存在
         if (self.performance && self.performance.now) {
             this._now = self.performance.now.bind(self.performance);
         } else {
             this._now = Date.now;
         }
 
+        // 定义已寻找到的持续时间
         this._pendingSeekTime = null;  // in seconds
+        // 定义请求设置的时间
         this._requestSetTime = false;
+        // 定义寻求的关键点记录
         this._seekpointRecord = null;
+        // 定义进度条检测方法(定时任务)
         this._progressChecker = null;
 
+        // 定义mediaDataSource为私有变量
         this._mediaDataSource = mediaDataSource;
+        // 定义媒体加载标签
         this._mediaElement = null;
+        // 定义媒体流控制器
         this._msectl = null;
+        // 定义转义方法
         this._transmuxer = null;
-
+        // 定义媒体流控制器是否开启
         this._mseSourceOpened = false;
+        // 定义媒体流控制器是否等待加载
         this._hasPendingLoad = false;
+        // 定义媒体流是否可以播放
         this._receivedCanPlay = false;
-
+        // 定义当前媒体流信息
         this._mediaInfo = null;
+        // 定义当期那静态信息
         this._statisticsInfo = null;
 
         let chromeNeedIDRFix = (Browser.chrome &&
@@ -88,25 +104,30 @@ class FlvPlayer {
             this._config.accurateSeek = false;
         }
     }
-
+    // 销毁当前播放器
     destroy() {
+        // 判断进度加载定时器是否存在 如果存在则销毁定时器
         if (this._progressChecker != null) {
             window.clearInterval(this._progressChecker);
             this._progressChecker = null;
         }
+        // 判断转义方法是否存在 存在的话就移除转移 
         if (this._transmuxer) {
             this.unload();
         }
+        // 判断媒体播放标签是否存在 如果存在则移除
         if (this._mediaElement) {
             this.detachMediaElement();
         }
+        // 私有方法值为空
         this.e = null;
+        // 媒体配置信息置为空
         this._mediaDataSource = null;
-
+        // 移除所有事件监听并把事件监听器置为空
         this._emitter.removeAllListeners();
         this._emitter = null;
     }
-
+    // 添加方法事件监听方法
     on(event, listener) {
         if (event === PlayerEvents.MEDIA_INFO) {
             if (this._mediaInfo != null) {
@@ -123,30 +144,43 @@ class FlvPlayer {
         }
         this._emitter.addListener(event, listener);
     }
-
+    // 解除方法事件监听方法
     off(event, listener) {
         this._emitter.removeListener(event, listener);
     }
-
+    // 加载流媒体播放标签
     attachMediaElement(mediaElement) {
+        // 赋值传递过来的video标签实例 到本地私有变量的实力
         this._mediaElement = mediaElement;
+        // 监听video标签的默认事件
+        // 加载元数据事件
         mediaElement.addEventListener('loadedmetadata', this.e.onvLoadedMetadata);
+        // 用户跳转视频进度事件
         mediaElement.addEventListener('seeking', this.e.onvSeeking);
+        // 音视频可播放事件
         mediaElement.addEventListener('canplay', this.e.onvCanPlay);
+        // 当不可获取音视频时事件
         mediaElement.addEventListener('stalled', this.e.onvStalled);
+        // 音视频正在记载事件
         mediaElement.addEventListener('progress', this.e.onvProgress);
 
+        // 加载配置信息并创建和赋值媒体流控制器
         this._msectl = new MSEController(this._config);
 
+        // 媒体流控制器加载完成事件监听 
         this._msectl.on(MSEEvents.UPDATE_END, this._onmseUpdateEnd.bind(this));
+        // 媒体流控制器buffer信息加载溢出事件监听
         this._msectl.on(MSEEvents.BUFFER_FULL, this._onmseBufferFull.bind(this));
+        // 监听媒体流控制器打开事件
         this._msectl.on(MSEEvents.SOURCE_OPEN, () => {
             this._mseSourceOpened = true;
+            // 判断媒体流控制器是否等待加载
             if (this._hasPendingLoad) {
                 this._hasPendingLoad = false;
                 this.load();
             }
         });
+        // 监听媒体流控制器错误事件
         this._msectl.on(MSEEvents.ERROR, (info) => {
             this._emitter.emit(PlayerEvents.ERROR,
                                ErrorTypes.MEDIA_ERROR,
@@ -154,6 +188,9 @@ class FlvPlayer {
                                info
             );
         });
+
+        // 监听流媒体加载buffer的数据时间
+        this._msectl.on(MSEEvents.LOADBUFFER, (bufferData)=>{this._emitter.emit(MSEEvents.LOADBUFFER, bufferData); });
 
         this._msectl.attachMediaElement(mediaElement);
 
@@ -167,7 +204,7 @@ class FlvPlayer {
             }
         }
     }
-
+    // 移除流媒体播放标签
     detachMediaElement() {
         if (this._mediaElement) {
             this._msectl.detachMediaElement();
@@ -183,7 +220,7 @@ class FlvPlayer {
             this._msectl = null;
         }
     }
-
+    // flvJs加载方法
     load() {
         if (!this._mediaElement) {
             throw new IllegalStateException('HTMLMediaElement must be attached before load()!');
@@ -213,7 +250,6 @@ class FlvPlayer {
         });
         this._transmuxer.on(TransmuxingEvents.MEDIA_SEGMENT, (type, ms) => {
             this._msectl.appendMediaSegment(ms);
-
             // lazyLoad check
             if (this._config.lazyLoad && !this._config.isLive) {
                 let currentTime = this._mediaElement.currentTime;
@@ -258,10 +294,10 @@ class FlvPlayer {
                 this._mediaElement.currentTime = milliseconds / 1000;
             }
         });
-
+        // this._transmuxer.on('chunkReturn', (bufferData)=>{this._emitter.emit('chunkReturn', bufferData); });
         this._transmuxer.open();
     }
-
+    // flvJs移除方法
     unload() {
         if (this._mediaElement) {
             this._mediaElement.pause();
@@ -275,11 +311,11 @@ class FlvPlayer {
             this._transmuxer = null;
         }
     }
-
+    // 播放器播放方法
     play() {
         return this._mediaElement.play();
     }
-
+    // 播放器暂停方法
     pause() {
         this._mediaElement.pause();
     }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import EventEmitter from 'events';
 import {NotImplementedException} from '../utils/exception.js';
 
 export const LoaderStatus = {
@@ -54,6 +54,7 @@ export class BaseLoader {
         this._onDataArrival = null;
         this._onError = null;
         this._onComplete = null;
+        this._emitter = new EventEmitter();
     }
 
     destroy() {
@@ -63,6 +64,15 @@ export class BaseLoader {
         this._onDataArrival = null;
         this._onError = null;
         this._onComplete = null;
+        this._emitter.removeAllListeners();
+        this._emitter = null;
+    }
+    on(event, listener) {
+        this._emitter.addListener(event, listener);
+    }
+
+    off(event, listener) {
+        this._emitter.removeListener(event, listener);
     }
 
     isWorking() {
