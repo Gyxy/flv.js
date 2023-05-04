@@ -294,7 +294,7 @@ class FlvPlayer {
                 this._mediaElement.currentTime = milliseconds / 1000;
             }
         });
-        // this._transmuxer.on('chunkReturn', (bufferData)=>{this._emitter.emit('chunkReturn', bufferData); });
+        this._transmuxer.on('chunkReturn', (bufferData)=>{this._emitter.emit('chunkReturn', bufferData); });
         this._transmuxer.open();
     }
     // flvJs移除方法

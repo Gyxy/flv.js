@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>flv.js demo</title>
+    <link rel="stylesheet" type="text/css" href="demo.css" />
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+    <script>
+        let  peer = new Peer();
+        peer.on('open', function(id) {
+          console.log('My peer ID is: ' + id);
+          let conn =  peer.connect("0bf30939-5a59-41f8-abe0-af2467d7b5ab");
+          conn.on('open', function() {
+            // Receive messages
+            conn.on('data', function(data) {
+              console.log('Received', data);
+            });
+
+            // Send messages
+            // conn.send('Hello!');
+          });
+        });
+        // console.log(peer)
+       
+        // peer.on('open', function(id) {
+        //     console.log('My peer ID is: ' + id);
+        // });
+        // // be598d92-25b2-449e-abb0-4e4e9f72753a
+        // // c3e49e41-65a6-44c1-a812-d0415c154f16
+    </script>
+    
+</body>
+
+</html>
