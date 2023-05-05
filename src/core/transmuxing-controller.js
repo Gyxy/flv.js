@@ -238,6 +238,8 @@ class TransmuxingController {
     _onInitChunkArrival(data, byteStart) {
         let probeData = null;
         let consumed = 0;
+        console.log(data)
+        console.log(byteStart)
 
         if (byteStart > 0) {
             // IOController seeked immediately after opened, byteStart > 0 callback may received
@@ -422,7 +424,6 @@ class TransmuxingController {
 
     _reportStatisticsInfo() {
         let info = {};
-
         info.url = this._ioctl.currentURL;
         info.hasRedirect = this._ioctl.hasRedirect;
         if (info.hasRedirect) {

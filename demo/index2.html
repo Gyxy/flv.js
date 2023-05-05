@@ -6,31 +6,46 @@
     <title>flv.js demo</title>
     <link rel="stylesheet" type="text/css" href="demo.css" />
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="../dist/flv.js"></script>
+
 </head>
 
 <body>
+    <video style="width:200px;height: 200px;" id="videoElement" name="videoElement" class="centeredVideo" controls autoplay>
+      Your browser is too old which doesn't support HTML5 video.
+    </video>
     <script>
-        let  peer = new Peer();
-        peer.on('open', function(id) {
-          console.log('My peer ID is: ' + id);
-          let conn =  peer.connect("0bf30939-5a59-41f8-abe0-af2467d7b5ab");
-          conn.on('open', function() {
-            // Receive messages
-            conn.on('data', function(data) {
-              console.log('Received', data);
-            });
+     
+      var player = flvjs.createPlayer({
+          type: 'flv',
+          url:"676b72a8-e2bf-453a-a000-0a025a6470ec",
+          // url: 'https://bd-flv.yinghecloud.com/zhongjiakang/6d38b8d0eb2311ed9ba57f883320eec9.flv?secret=731938d1c10ea9b8d5ebecbee9c45b6d&timestamp=1683280899',
+          // https://bd-flv.yinghecloud.com/zhongjiakang/6d38b8d0eb2311ed9ba57f883320eec9.flv?secret=731938d1c10ea9b8d5ebecbee9c45b6d&timestamp=1683280899
+          isLive: true,
+          hasAudio: true,
+          hasVideo: true,
+      },{
+        customLoader: true
+      });
 
-            // Send messages
-            // conn.send('Hello!');
-          });
-        });
-        // console.log(peer)
-       
-        // peer.on('open', function(id) {
-        //     console.log('My peer ID is: ' + id);
-        // });
-        // // be598d92-25b2-449e-abb0-4e4e9f72753a
-        // // c3e49e41-65a6-44c1-a812-d0415c154f16
+      var videoElement = document.getElementById('videoElement');
+      player.attachMediaElement(videoElement);
+      player.load();
+      player.on('chunkReturn',(data)=>{
+        console.log("这是发送的数据信息")
+      })
+
+      // let  peer = new Peer();
+      // peer.on('open', function(id) {
+      //   console.log('My peer ID is: ' + id);
+      //   let conn =  peer.connect("0bba316c-e46b-4092-bb6f-753eed4bdc58");
+      //   conn.on('open', function() {
+      //     conn.on('data', function(data) {
+      //       console.log('Received', data);
+      //     });
+      //   });
+      // });
+
     </script>
     
 </body>

@@ -133,6 +133,10 @@ class FLVDemuxer {
     static probe(buffer) {
         let data = new Uint8Array(buffer);
         let mismatch = {match: false};
+        console.log(data[0])
+        console.log(data[1])
+        console.log(data[2])
+        console.log(data[3])
 
         if (data[0] !== 0x46 || data[1] !== 0x4C || data[2] !== 0x56 || data[3] !== 0x01) {
             return mismatch;

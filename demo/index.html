@@ -59,6 +59,10 @@
     <!-- <script src="./lwTest.js"></script> -->
     
     <script>
+        let peer = new Peer();
+        peer.on('open', function(id) {
+            console.log('My peer ID is: ' + id);
+        });
         var checkBoxFields = ['isLive', 'withCredentials', 'hasAudio', 'hasVideo'];
         var streamURL, mediaSourceURL;
         // initPlayer();
@@ -110,10 +114,7 @@
             
             player.attachMediaElement(element);
             player.load();
-            let  peer = new Peer();
-            peer.on('open', function(id) {
-                console.log('My peer ID is: ' + id);
-            });
+            
             peer.on('connection', function(conn) { 
                 console.log("链接成功")
                 conn.on('open', function() {
