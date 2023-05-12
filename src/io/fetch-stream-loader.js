@@ -53,6 +53,9 @@ class FetchStreamLoader extends BaseLoader {
         this._requestAbort = false;
         this._contentLength = null;
         this._receivedLength = 0;
+
+
+
     }
 
     destroy() {
@@ -126,9 +129,6 @@ class FetchStreamLoader extends BaseLoader {
         this._status = LoaderStatus.kConnecting;
 
         // 判断数据来源信息 如果数据来源信息未其他来源则不需要进行fetch进行请求数据
-
-        console.log(seekConfig)
-        console.log(dataSource)
 
         self.fetch(seekConfig.url, params).then((res) => {
             if (this._requestAbort) {
@@ -227,7 +227,6 @@ class FetchStreamLoader extends BaseLoader {
                 this._receivedLength += chunk.byteLength;
 
                 if (this._onDataArrival) {
-                    // 在这里处理获取到的数据信息 chunk 未当前读取到的块信息
                     this.sendBufferToOtherClient({chunk,byteStart})
                     this._onDataArrival(chunk, byteStart, this._receivedLength);
                 }

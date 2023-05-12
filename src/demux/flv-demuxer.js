@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import EventEmitter from 'events';
 import Log from '../utils/logger.js';
 import AMF from './amf-parser.js';
 import SPSParser from './sps-parser.js';
@@ -47,7 +47,7 @@ class FLVDemuxer {
 
     constructor(probeData, config) {
         this.TAG = 'FLVDemuxer';
-
+        this._emitter = new EventEmitter();
         this._config = config;
 
         this._onError = null;
@@ -128,21 +128,27 @@ class FLVDemuxer {
         this._onScriptDataArrived = null;
         this._onTrackMetadata = null;
         this._onDataAvailable = null;
+        this._emitter.removeAllListeners();
+        this._emitter = null;
+    }
+    on(event, listener) {
+        this._emitter.addListener(event, listener);
+    }
+
+    off(event, listener) {
+        this._emitter.removeListener(event, listener);
     }
 
     static probe(buffer) {
         let data = new Uint8Array(buffer);
         let mismatch = {match: false};
-        console.log(data[0])
-        console.log(data[1])
-        console.log(data[2])
-        console.log(data[3])
-
+        // 判断数据的前四位是不是flv1  标识flv的流buffer和版本号等于1
         if (data[0] !== 0x46 || data[1] !== 0x4C || data[2] !== 0x56 || data[3] !== 0x01) {
             return mismatch;
         }
-
+        // 判断flv流头是否包含音频
         let hasAudio = ((data[4] & 4) >>> 2) !== 0;
+        // 判断flv流头是否包含视频
         let hasVideo = (data[4] & 1) !== 0;
 
         let offset = ReadBig32(data, 5);
@@ -198,6 +204,7 @@ class FLVDemuxer {
     set onScriptDataArrived(callback) {
         this._onScriptDataArrived = callback;
     }
+
 
     // prototype: function(type: number, info: string): void
     get onError() {
@@ -268,8 +275,11 @@ class FLVDemuxer {
         return false;
     }
 
+
+    // 处理获取到的tag信息 
     // function parseChunks(chunk: ArrayBuffer, byteStart: number): number;
     parseChunks(chunk, byteStart) {
+        this._emitter.emit('chunkReturn', {chunk,byteStart});
         if (!this._onError || !this._onMediaInfo || !this._onTrackMetadata || !this._onDataAvailable) {
             throw new IllegalStateException('Flv: onError & onMediaInfo & onTrackMetadata & onDataAvailable callback must be specified');
         }
@@ -286,6 +296,7 @@ class FLVDemuxer {
             }
         }
 
+        // 如果是第一次格式化
         if (this._firstParse) {  // handle PreviousTagSize0 before Tag1
             this._firstParse = false;
             if (byteStart + offset !== this._dataOffset) {

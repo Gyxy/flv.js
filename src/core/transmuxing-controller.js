@@ -238,8 +238,6 @@ class TransmuxingController {
     _onInitChunkArrival(data, byteStart) {
         let probeData = null;
         let consumed = 0;
-        console.log(data)
-        console.log(byteStart)
 
         if (byteStart > 0) {
             // IOController seeked immediately after opened, byteStart > 0 callback may received
@@ -279,8 +277,11 @@ class TransmuxingController {
 
             this._remuxer.onInitSegment = this._onRemuxerInitSegmentArrival.bind(this);
             this._remuxer.onMediaSegment = this._onRemuxerMediaSegmentArrival.bind(this);
-
+            // this._demuxer.on('chunkReturn', (bufferData)=>{
+            //     this._emitter.emit('chunkReturn', bufferData);
+            // });
             consumed = this._demuxer.parseChunks(data, byteStart);
+            
         } else {
             probeData = null;
             Log.e(this.TAG, 'Non-FLV, Unsupported media type!');
@@ -291,7 +292,7 @@ class TransmuxingController {
 
             consumed = 0;
         }
-
+       
         return consumed;
     }
 

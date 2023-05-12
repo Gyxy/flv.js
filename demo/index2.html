@@ -11,41 +11,27 @@
 </head>
 
 <body>
+    <button onclick="toReload()">重载</button>
     <video style="width:200px;height: 200px;" id="videoElement" name="videoElement" class="centeredVideo" controls autoplay>
       Your browser is too old which doesn't support HTML5 video.
     </video>
     <script>
-     
       var player = flvjs.createPlayer({
           type: 'flv',
-          url:"676b72a8-e2bf-453a-a000-0a025a6470ec",
-          // url: 'https://bd-flv.yinghecloud.com/zhongjiakang/6d38b8d0eb2311ed9ba57f883320eec9.flv?secret=731938d1c10ea9b8d5ebecbee9c45b6d&timestamp=1683280899',
-          // https://bd-flv.yinghecloud.com/zhongjiakang/6d38b8d0eb2311ed9ba57f883320eec9.flv?secret=731938d1c10ea9b8d5ebecbee9c45b6d&timestamp=1683280899
+          url:"a8ea1fa3-a1e7-4a46-b2cd-2e74162415ea",
           isLive: true,
           hasAudio: true,
           hasVideo: true,
       },{
         customLoader: true
       });
-
       var videoElement = document.getElementById('videoElement');
       player.attachMediaElement(videoElement);
       player.load();
-      player.on('chunkReturn',(data)=>{
-        console.log("这是发送的数据信息")
-      })
 
-      // let  peer = new Peer();
-      // peer.on('open', function(id) {
-      //   console.log('My peer ID is: ' + id);
-      //   let conn =  peer.connect("0bba316c-e46b-4092-bb6f-753eed4bdc58");
-      //   conn.on('open', function() {
-      //     conn.on('data', function(data) {
-      //       console.log('Received', data);
-      //     });
-      //   });
-      // });
-
+      function toReload(){
+        window.location.reload();
+      }
     </script>
     
 </body>

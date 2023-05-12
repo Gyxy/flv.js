@@ -115,17 +115,22 @@ class webRtcLoader extends BaseLoader {
     }
     _onWebRtcConData(e){
         if (e.chunk instanceof ArrayBuffer) {
-            if(this._receivedLength==0){
-                console.log("加载到的数据",e.chunk)
-                const originalArray = new Uint8Array(e.chunk);
-                originalArray.set([70, 76, 86, 1],0);
-                this._dispatchArrayBuffer(originalArray);
-                console.log("加载到的数据",originalArray)
-            }else{
-                console.log("加载到的数据",e.chunk)
-                this._dispatchArrayBuffer(e.chunk);
-                console.log("加载到的数据",e.chunk)
-            }
+            console.log("加载到的数据信息",e.chunk)
+
+            // 处理其他的信息
+
+            this._dispatchArrayBuffer(e.chunk);
+            // if(this._receivedLength==0){
+            //     console.log("加载到的数据",e.chunk)
+            //     const originalArray = new Uint8Array(e.chunk);
+            //     originalArray.set([70, 76, 86, 1],0);
+            //     this._dispatchArrayBuffer(originalArray);
+            //     console.log("加载到的数据",originalArray)
+            // }else{
+            //     console.log("加载到的数据",e.chunk)
+            //     this._dispatchArrayBuffer(e.chunk);
+            //     console.log("加载到的数据",e.chunk)
+            // }
            
         }
     }

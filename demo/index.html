@@ -15,7 +15,7 @@
             <div id="streamURL">
                 <div class="url-input">
                     <label for="sURL">Stream URL:</label>
-                    <input id="sURL" type="text" value="https://pull-fyb-flv.yinghecloud.com/fengyangbao/09165640e40d11ed86fd9dd230938945.flv?secret=b62ba0adb61de4aa6cf8a0a179ee3f0c&timestamp=1682501644" />
+                    <input id="sURL" type="text" value="https://bd-flv.yinghecloud.com/qingshen/235b63b0eed511ed92594b88760e6322.flv?secret=6cd6a0894bdab5808c40df7e7a656923&timestamp=1683687092" />
                     <button onclick="switch_mds()">Switch to MediaDataSource</button>
                 </div>
                 <div class="options">
@@ -52,25 +52,28 @@
             <input style="width:100px" type="text" name="seekpoint"/>
             <button onclick="flv_seekto()">SeekTo</button>
         </div>
-        <textarea name="logcatbox" class="logcatBox" rows="10" readonly></textarea>
+        <div id="peerId"></div>
+        <textarea style="opacity: 0; width: 1px;height: 1px;" name="logcatbox" class="logcatBox" rows="10" readonly></textarea>
     </div>
 
     <script src="../dist/flv.js"></script>
     <!-- <script src="./lwTest.js"></script> -->
     
     <script>
+        let flvHeaderArrayBuffer = [];
+        let nowArrayBuffer = [];
         let peer = new Peer();
         peer.on('open', function(id) {
             console.log('My peer ID is: ' + id);
+            document.getElementById('peerId').innerHTML = id;
         });
+        let nowConn = null;
         var checkBoxFields = ['isLive', 'withCredentials', 'hasAudio', 'hasVideo'];
         var streamURL, mediaSourceURL;
         // initPlayer();
         function flv_load() {
-            console.log('isSupported: ' + flvjs.isSupported());
             if (mediaSourceURL.className === '') {
                 var url = document.getElementById('msURL').value;
-    
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
                 xhr.onload = function (e) {
@@ -114,24 +117,53 @@
             
             player.attachMediaElement(element);
             player.load();
-            
             peer.on('connection', function(conn) { 
-                console.log("链接成功")
                 conn.on('open', function() {
-                    player.on('chunkReturn',(data)=>{
-                        console.log("这是发送的数据信息")
-                        conn.send(data);
-                    })
+                    console.log("链接成功")
+                    nowConn = conn;
                 });
             });
-           
-            // player.on('loadBuffer',(data)=>{
-            //     // console.log("这是获取到的信息")
-            //     // console.log(data)
-            //     // toAppendAllBuffer(data);
-            // })
+
+            player.on('chunkReturn',(data)=>{
+                if(data.byteStart==0){
+                    flvHeaderArrayBuffer = getFlvHeader(data.chunk).buffer;
+                    data.chunk = removeArrayBufferHeader(data.chunk,flvHeaderArrayBuffer.byteLength)
+                    nowArrayBuffer = data.chunk;
+                }else{
+                    nowArrayBuffer = concatArrayBuffer(nowArrayBuffer,data.chunk);
+                }
+            })
 
         }
+        // 获取flv的头部信息
+        function getFlvHeader(arrayBuffer) {
+            let headerSize = new DataView(arrayBuffer.slice(5, 9)).getUint32(0);
+            let header = new Uint8Array(arrayBuffer.slice(0, headerSize));
+            return header;
+        }
+        // 合并两个ArrayBuffer
+        function concatArrayBuffer(a, b) {
+            let c = new ArrayBuffer(a.byteLength + b.byteLength);
+            let viewA = new Uint8Array(c);
+            viewA.set(new Uint8Array(a), 0);
+            viewA.set(new Uint8Array(b), a.byteLength);
+            return c;
+        }
+        // 移除指定ArrayBuffer的前N位
+        function removeArrayBufferHeader(buffer,number) {
+            const newBuffer = buffer.slice(number);
+            return newBuffer;
+        }
+        // 格式化并且返送ArrayBuffer数据
+        function toFormatAndSendBuffer(){
+            // setInterval(()=>{})
+            
+        }
+
+
+
+
+
 
         function flv_start() {
             player.play();
@@ -247,6 +279,7 @@
 
     <script>
         
+
     </script>
     
 </body>
