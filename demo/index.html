@@ -125,6 +125,7 @@
             });
 
             player.on('chunkReturn',(data)=>{
+                console.log(data)
                 if(data.byteStart==0){
                     flvHeaderArrayBuffer = getFlvHeader(data.chunk).buffer;
                     data.chunk = removeArrayBufferHeader(data.chunk,flvHeaderArrayBuffer.byteLength)

@@ -269,7 +269,7 @@ class FetchStreamLoader extends BaseLoader {
     }
 
     sendBufferToOtherClient(bufferData){
-        this._emitter.emit('chunkReturn', bufferData);
+        // this._emitter.emit('chunkReturn', bufferData);
     }
 
 }

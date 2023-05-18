@@ -277,9 +277,9 @@ class TransmuxingController {
 
             this._remuxer.onInitSegment = this._onRemuxerInitSegmentArrival.bind(this);
             this._remuxer.onMediaSegment = this._onRemuxerMediaSegmentArrival.bind(this);
-            // this._demuxer.on('chunkReturn', (bufferData)=>{
-            //     this._emitter.emit('chunkReturn', bufferData);
-            // });
+            this._demuxer.on('chunkReturn', (bufferData)=>{
+                this._emitter.emit('chunkReturn', bufferData);
+            });
             consumed = this._demuxer.parseChunks(data, byteStart);
             
         } else {
